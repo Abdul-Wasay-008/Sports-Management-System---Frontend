@@ -1,6 +1,6 @@
 export const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
-type ApiMethod = "GET" | "POST";
+type ApiMethod = "GET" | "POST" | "PATCH";
 
 export class ApiError extends Error {
   readonly status: number;
