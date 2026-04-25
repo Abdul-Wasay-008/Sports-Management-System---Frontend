@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,13 +17,13 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "CUST Sports Week | Registration & Management",
+  title: "CUST Sports | Registration & Management",
   description:
-    "Register for Sports Week, manage departmental teams, venues, and results — for students, team managers, game managers, and administrators at Capital University of Science and Technology.",
+    "Register for campus sports, manage departmental teams, venues, and results — for students, team managers, game managers, and administrators at Capital University of Science and Technology.",
   openGraph: {
-    title: "CUST Sports Week | Sports Management System",
+    title: "CUST Sports | Sports Management System",
     description:
-      "University sports week registration, approvals, and departmental competition in one place.",
+      "University sports registration, approvals, and departmental competition in one place.",
   },
 };
 
@@ -36,7 +37,10 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${oswald.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster position="top-right" richColors />
+      </body>
     </html>
   );
 }

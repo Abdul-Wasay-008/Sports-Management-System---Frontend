@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { apiRequest, ApiError } from "@/lib/api";
 import { DEPARTMENTS } from "@/data/departments";
 
+const STRONG_PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
 export function RegisterForm() {
+  const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [gender, setGender] = useState<"male" | "female" | "">("");
@@ -12,24 +19,55 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!email.trim().toLowerCase().endsWith("@cust.pk")) {
+      toast.error("Only @cust.pk email addresses are allowed.");
+      return;
+    }
+    if (!name.trim()) {
+      toast.error("Please enter your full name.");
+      return;
+    }
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
+      return;
+    }
+    if (!STRONG_PASSWORD_REGEX.test(password)) {
+      toast.error("Password must be at least 8 characters, with 1 uppercase letter and 1 number.");
       return;
     }
     if (!gender) {
-      alert("Please select your gender.");
+      toast.error("Please select your gender.");
       return;
     }
-    console.log("register", {
-      email,
-      registrationNumber,
-      gender,
-      department,
-      password: "***",
-    });
+    setIsSubmitting(true);
+    try {
+      const data = await apiRequest<{ message: string }>("/auth/register", "POST", {
+        name: name.trim(),
+        email: email.trim(),
+        registrationNumber: registrationNumber.trim(),
+        gender,
+        department,
+        password,
+      });
+      toast.success(data.message || "Registration successful. Please verify your email.");
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 409) {
+          toast.error(err.message || "Email or registration number is already taken.");
+        } else {
+          toast.error(err.message);
+        }
+      } else {
+        toast.error("Unable to register right now. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -49,6 +87,23 @@ export function RegisterForm() {
 
       <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-lg shadow-slate-900/5 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="reg-name" className="mb-1.5 block text-sm font-medium text-brand-900">
+              Full name <span className="text-red-600">*</span>
+            </label>
+            <input
+              id="reg-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Farhat Zahra"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-900 outline-none ring-brand-amber-500/30 transition placeholder:text-slate-400 focus:border-brand-amber-500 focus:bg-white focus:ring-4"
+            />
+          </div>
+
           <div>
             <label htmlFor="reg-email" className="mb-1.5 block text-sm font-medium text-brand-900">
               University Email <span className="text-red-600">*</span>
@@ -172,9 +227,11 @@ export function RegisterForm() {
                   autoComplete="new-password"
                   required
                   minLength={8}
+                  pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+                  title="Password must be at least 8 characters, with at least one uppercase letter and one number."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder="At least 8 chars, 1 uppercase, 1 number"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-900 outline-none ring-brand-amber-500/30 transition placeholder:text-slate-400 focus:border-brand-amber-500 focus:bg-white focus:ring-4"
                 />
               </div>
@@ -199,9 +256,10 @@ export function RegisterForm() {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full rounded-xl bg-linear-to-r from-brand-amber-500 to-amber-600 py-3.5 text-base font-semibold text-brand-950 shadow-md shadow-amber-500/25 transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-amber-500"
           >
-            Create account
+            {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </form>
 

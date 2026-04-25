@@ -2,7 +2,7 @@ import Link from "next/link";
 
 type AuthNavProps = {
   /** Highlight current auth mode for link styling */
-  mode: "login" | "register";
+  mode: "login" | "register" | "verify-email";
 };
 
 export function AuthNav({ mode }: AuthNavProps) {

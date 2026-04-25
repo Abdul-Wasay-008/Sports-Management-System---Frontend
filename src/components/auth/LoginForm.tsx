@@ -1,17 +1,49 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { apiRequest, ApiError } from "@/lib/api";
+import { saveAuthToken } from "@/lib/auth";
 
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Frontend only — wire to API later
-    console.log("login", { email, password: "***" });
+
+    if (!email.trim().toLowerCase().endsWith("@cust.pk")) {
+      toast.error("Only @cust.pk email addresses are allowed.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const data = await apiRequest<{
+        token: string;
+        message: string;
+      }>("/auth/login", "POST", {
+        email: email.trim(),
+        password,
+      });
+
+      saveAuthToken(data.token);
+      toast.success(data.message || "Login successful.");
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(err.message);
+      } else {
+        toast.error("Unable to sign in right now. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -72,9 +104,10 @@ export function LoginForm() {
           </div>
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full rounded-xl bg-linear-to-r from-brand-amber-500 to-amber-600 py-3.5 text-base font-semibold text-brand-950 shadow-md shadow-amber-500/25 transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-amber-500"
           >
-            Sign in
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
