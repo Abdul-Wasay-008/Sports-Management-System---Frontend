@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ApiError } from "@/lib/api";
-import { getStats } from "@/lib/student-api";
+import { getDashboardData, getStats } from "@/lib/student-api";
 
 type StatsResponse = Awaited<ReturnType<typeof getStats>>;
 
@@ -12,7 +12,10 @@ export default function StatsPage() {
   const [data, setData] = useState<StatsResponse | null>(null);
 
   useEffect(() => {
-    getStats()
+    getDashboardData()
+      .then((dashboard) =>
+        getStats({ department: dashboard.student.department, gender: dashboard.student.gender }),
+      )
       .then(setData)
       .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load stats."));
   }, []);

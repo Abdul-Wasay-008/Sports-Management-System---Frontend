@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ApiError } from "@/lib/api";
-import { getGames } from "@/lib/student-api";
+import { getDashboardData, getGames } from "@/lib/student-api";
 
 type GamesResponse = Awaited<ReturnType<typeof getGames>>;
 
@@ -13,7 +13,10 @@ export default function GamesPage() {
   const [data, setData] = useState<GamesResponse | null>(null);
 
   useEffect(() => {
-    getGames()
+    getDashboardData()
+      .then((dashboard) =>
+        getGames({ department: dashboard.student.department, gender: dashboard.student.gender }),
+      )
       .then(setData)
       .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load games."));
   }, []);

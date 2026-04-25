@@ -1,10 +1,28 @@
 import { apiRequest } from "./api";
 import { getAuthToken } from "./auth";
 
+type StudentFilters = {
+  department?: string;
+  gender?: "male" | "female" | "mixed";
+  gameCategoryId?: string;
+  gameId?: string;
+};
+
 function requireToken() {
   const token = getAuthToken();
   if (!token) throw new Error("Missing authentication token.");
   return token;
+}
+
+function withQuery(path: string, filters?: StudentFilters) {
+  if (!filters) return path;
+  const params = new URLSearchParams();
+  if (filters.department) params.set("department", filters.department);
+  if (filters.gender) params.set("gender", filters.gender);
+  if (filters.gameCategoryId) params.set("gameCategoryId", filters.gameCategoryId);
+  if (filters.gameId) params.set("gameId", filters.gameId);
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
 }
 
 export function getDashboardData() {
@@ -26,7 +44,7 @@ export function getDashboardData() {
   }>("/student/dashboard", "GET", undefined, requireToken());
 }
 
-export function getGames() {
+export function getGames(filters?: StudentFilters) {
   return apiRequest<{
     games: Array<{
       id: string;
@@ -41,7 +59,7 @@ export function getGames() {
       registrationOpen: boolean;
       manager: { id: string; name: string } | null;
     }>;
-  }>("/student/games", "GET", undefined, requireToken());
+  }>(withQuery("/student/games", filters), "GET", undefined, requireToken());
 }
 
 export function getGameDetails(gameId: string) {
@@ -79,7 +97,7 @@ export function registerForGame(gameId: string) {
   );
 }
 
-export function getRegistrations() {
+export function getRegistrations(filters?: StudentFilters) {
   return apiRequest<{
     registrations: Array<{
       id: string;
@@ -89,7 +107,7 @@ export function getRegistrations() {
       createdAt: string;
       game: { id: string; title: string; venue: string } | null;
     }>;
-  }>("/student/registrations", "GET", undefined, requireToken());
+  }>(withQuery("/student/registrations", filters), "GET", undefined, requireToken());
 }
 
 export function decideRegistration(id: string, status: "accepted" | "rejected") {
@@ -128,7 +146,7 @@ export function getCommittee() {
   );
 }
 
-export function getGameManagers() {
+export function getGameManagers(filters?: Pick<StudentFilters, "gameCategoryId">) {
   return apiRequest<{
     managers: Array<{
       _id: string;
@@ -138,27 +156,30 @@ export function getGameManagers() {
       officeAddress: string;
       officeHours: string;
       department?: string;
+      categoryId?: string | null;
+      categoryName?: string;
     }>;
-  }>("/student/game-managers", "GET", undefined, requireToken());
+  }>(withQuery("/student/game-managers", filters), "GET", undefined, requireToken());
 }
 
-export function getResults() {
+export function getResults(filters?: StudentFilters) {
   return apiRequest<{
     results: Array<{
       _id: string;
       gameTitle: string;
+      genderCategory?: "male" | "female" | "mixed";
       winnerDepartment: string;
       runnerUpDepartment?: string;
       playedAt: string;
     }>;
-  }>("/student/results", "GET", undefined, requireToken());
+  }>(withQuery("/student/results", filters), "GET", undefined, requireToken());
 }
 
-export function getStats() {
+export function getStats(filters?: Pick<StudentFilters, "department" | "gender" | "gameCategoryId">) {
   return apiRequest<{
     byDepartment: Array<{ label: string; value: number }>;
     byGame: Array<{ label: string; value: number }>;
-  }>("/student/stats", "GET", undefined, requireToken());
+  }>(withQuery("/student/stats", filters), "GET", undefined, requireToken());
 }
 
 export function getNotifications() {
@@ -172,4 +193,30 @@ export function getNotifications() {
       createdAt: string;
     }>;
   }>("/student/notifications", "GET", undefined, requireToken());
+}
+
+export function getDepartmentTeamManagers(
+  filters?: Pick<StudentFilters, "department" | "gameCategoryId">,
+) {
+  return apiRequest<{
+    teamManagers: Array<{
+      _id: string;
+      department: string;
+      managerName: string;
+      contact: string | null;
+      gameCategoryId: string | null;
+      gameCategoryName: string;
+    }>;
+  }>(withQuery("/student/team-managers", filters), "GET", undefined, requireToken());
+}
+
+export function getGameCategories() {
+  return apiRequest<{
+    categories: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      gender: "male" | "female" | "mixed";
+    }>;
+  }>("/student/game-categories", "GET", undefined, requireToken());
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ApiError } from "@/lib/api";
-import { getResults } from "@/lib/student-api";
+import { getDashboardData, getResults } from "@/lib/student-api";
 
 type ResultsResponse = Awaited<ReturnType<typeof getResults>>;
 
@@ -12,7 +12,10 @@ export default function ResultsPage() {
   const [data, setData] = useState<ResultsResponse | null>(null);
 
   useEffect(() => {
-    getResults()
+    getDashboardData()
+      .then((dashboard) =>
+        getResults({ department: dashboard.student.department, gender: dashboard.student.gender }),
+      )
       .then(setData)
       .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load results."));
   }, []);
@@ -26,6 +29,11 @@ export default function ResultsPage() {
             className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm"
           >
             <h2 className="font-heading text-xl text-brand-900">{result.gameTitle}</h2>
+            {result.genderCategory ? (
+              <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">
+                Category: {result.genderCategory}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm text-slate-600">Winner: {result.winnerDepartment}</p>
             {result.runnerUpDepartment ? (
               <p className="mt-1 text-sm text-slate-600">Runner-up: {result.runnerUpDepartment}</p>
