@@ -1,15 +1,15 @@
 const hierarchy = [
   {
     name: "Core Committee",
-    detail: "Oversees Sports Week, schedule changes, and high-level policy — the top tier in the official manual.",
+    detail: "Oversees platform-wide sports operations, schedule updates, and high-level policy decisions.",
   },
   {
     name: "Game managers",
-    detail: "Appointed to run each sport: smooth conduct, timing with the published schedule, and final clarification on the ground.",
+    detail: "Run each sport: ensure smooth conduct, maintain match timing, and handle on-ground clarifications.",
   },
   {
     name: "Department sports managers & team managers",
-    detail: "Coordinate with the committee and your department, manage rosters, and represent teams during matches as described for CUST teams.",
+    detail: "Coordinate with the committee and departments, manage rosters, and represent teams during matches.",
   },
 ];
 
@@ -22,12 +22,12 @@ export function OrganizerSection() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
-            How Sports Week is organized
+            How sports are organized
           </h2>
           <p className="mt-3 text-slate-600">
-            The manual describes a clear chain from the core committee to game and
-            department managers. This app is designed to support that structure
-            online.
+            A clear chain from the core committee to game and department managers
+            keeps operations structured. This platform supports that workflow
+            online year-round.
           </p>
         </div>
         <ol className="mt-12 space-y-4">

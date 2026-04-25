@@ -5,7 +5,7 @@ export function CTASection() {
     <section className="border-t border-slate-200/80 bg-brand-900 py-16 sm:py-20">
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
         <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl">
-          Ready to join Sports Week?
+          Ready to join campus sports?
         </h2>
         <p className="mt-3 text-slate-300">
           Create an account to register for events, or sign in if your department
