@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CUST Sports trophy icon">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f59e0b" />
+      <stop offset="1" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bg)" />
+  <g fill="none" stroke="#172554" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 17h20v5a10 10 0 0 1-10 10 10 10 0 0 1-10-10v-5Z" fill="#172554" stroke="none" />
+    <path d="M22 22h-7a2.5 2.5 0 0 0-2.5 2.5v2a9 9 0 0 0 9 9M42 22h7a2.5 2.5 0 0 1 2.5 2.5v2a9 9 0 0 1-9 9" stroke-width="4" />
+    <path d="M32 32v8M26 46h12M28 40h8M27 46v5h10v-5" stroke-width="4" />
+  </g>
+</svg>

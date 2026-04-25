@@ -31,7 +31,7 @@ export function Header() {
               CUST Sports
             </span>
             <span className="text-[10px] font-medium text-slate-400 sm:text-xs">
-              Management
+              Management System
             </span>
           </div>
         </Link>
@@ -105,8 +105,24 @@ export function Header() {
 
 function TrophyIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M6 4h12v1a5 5 0 0 1-4 4.9V15h1a1 1 0 0 1 1 1v2H6v-2a1 1 0 0 1 1-1h1v-5.1A5 5 0 0 1 6 5V4Zm2 0v1a3 3 0 0 0 3 3V10h2V8a3 3 0 0 0 3-3V4H8Zm-2 6H4a1 1 0 0 0-1 1v1a3 3 0 0 0 2.2 2.9 4.9 4.9 0 0 1-.2-1.3V10Zm14 0h2a1 1 0 0 1 1 1v1a3 3 0 0 1-2.2 2.9c.14-.4.2-.8.2-1.3V10Z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M8 4h8v2a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4Z"
+        fill="currentColor"
+      />
+      <path
+        d="M8 6H5a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4M16 6h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 10v4M9 18h6M10 14h4M9.5 18v2h5V18"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
