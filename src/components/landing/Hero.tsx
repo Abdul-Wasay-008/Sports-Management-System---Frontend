@@ -24,7 +24,7 @@ export function Hero() {
         <div className="max-w-2xl">
           <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-widest text-brand-amber-300 backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-amber-400" />
-            Sports Week · CUST
+            Manage Every Sport · CUST
           </p>
           <h1 className="font-heading text-4xl font-bold leading-[1.05] text-white sm:text-5xl md:text-6xl lg:text-7xl">
             Your home for
