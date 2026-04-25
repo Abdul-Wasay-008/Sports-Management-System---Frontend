@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign in | CUST Sports",
-  description: "Sign in to the CUST Sports Week management portal with your university email.",
+  description: "Sign in to the CUST Sports management platform with your university email.",
 };
 
 export default function LoginPage() {

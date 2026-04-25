@@ -42,9 +42,8 @@ export function RegisterForm() {
           Create your account
         </h1>
         <p className="mt-2 text-slate-600">
-          As specified for Sports Week: use your university email, registration number,
-          gender, and department. Authentication will protect your profile and
-          registrations.
+          Use your university email, registration number, gender, and department to
+          create your account. Authentication protects your profile and registrations.
         </p>
       </div>
 
@@ -118,8 +117,8 @@ export function RegisterForm() {
               ))}
             </div>
             <p className="mt-1.5 text-xs text-slate-500">
-              Sports Week events are listed by gender; this matches the project
-              requirements.
+              Events can be grouped by gender to keep registrations and participation
+              organized.
             </p>
           </fieldset>
 
@@ -143,7 +142,8 @@ export function RegisterForm() {
               ))}
             </select>
             <p className="mt-1.5 text-xs text-slate-500">
-              Departments follow the Sports Week manual listing for CUST.
+              Select your department to route registrations and team coordination
+              correctly.
             </p>
           </div>
 

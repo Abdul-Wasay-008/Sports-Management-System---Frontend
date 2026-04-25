@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Register | CUST Sports",
   description:
-    "Student registration for CUST Sports Week — email, registration number, gender, and department.",
+    "Student registration for CUST Sports — email, registration number, gender, and department.",
 };
 
 export default function RegisterPage() {
