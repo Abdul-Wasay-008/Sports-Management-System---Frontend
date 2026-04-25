@@ -51,7 +51,7 @@ export function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label htmlFor="reg-email" className="mb-1.5 block text-sm font-medium text-brand-900">
-              Email <span className="text-red-600">*</span>
+              University Email <span className="text-red-600">*</span>
             </label>
             <input
               id="reg-email"
@@ -61,7 +61,7 @@ export function RegisterForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="BCS223139@cust.edu.pk"
+              placeholder="BCS223139@cust.pk"
               className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-900 outline-none ring-brand-amber-500/30 transition placeholder:text-slate-400 focus:border-brand-amber-500 focus:bg-white focus:ring-4"
             />
           </div>

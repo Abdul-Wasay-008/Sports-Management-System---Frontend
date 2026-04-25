@@ -31,7 +31,7 @@ export function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium text-brand-900">
-              Email
+              University Email
             </label>
             <input
               id="login-email"
@@ -41,7 +41,7 @@ export function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@cust.edu.pk"
+              placeholder="BCS223139@cust.pk"
               className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-900 outline-none ring-brand-amber-500/30 transition placeholder:text-slate-400 focus:border-brand-amber-500 focus:bg-white focus:ring-4"
             />
           </div>
