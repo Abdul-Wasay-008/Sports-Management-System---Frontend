@@ -2,21 +2,33 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  BarChart3,
+  Bell,
+  CalendarClock,
+  ClipboardList,
+  Gavel,
+  LayoutDashboard,
+  Medal,
+  ShieldUser,
+  Trophy,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { clearAuthToken, getAuthToken } from "@/lib/auth";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/games", label: "Games" },
-  { href: "/dashboard/registrations", label: "My Registrations" },
-  { href: "/dashboard/schedule", label: "Schedule" },
-  { href: "/dashboard/rules", label: "Rules" },
-  { href: "/dashboard/committee", label: "Committee" },
-  { href: "/dashboard/managers", label: "Game Managers" },
-  { href: "/dashboard/results", label: "Results" },
-  { href: "/dashboard/stats", label: "Statistics" },
-  { href: "/dashboard/notifications", label: "Notifications" },
-];
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/games", label: "Games", icon: Medal },
+  { href: "/dashboard/registrations", label: "My Registrations", icon: ClipboardList },
+  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarClock },
+  { href: "/dashboard/rules", label: "Rules", icon: Gavel },
+  { href: "/dashboard/committee", label: "Committee", icon: ShieldUser },
+  { href: "/dashboard/managers", label: "Game Managers", icon: UsersRound },
+  { href: "/dashboard/results", label: "Results", icon: Trophy },
+  { href: "/dashboard/stats", label: "Statistics", icon: BarChart3 },
+] satisfies Array<{ href: string; label: string; icon: LucideIcon }>;
 
 export function DashboardShell({
   title,
@@ -48,16 +60,25 @@ export function DashboardShell({
               CUST Sports
             </span>
           </Link>
-          <button
-            type="button"
-            className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10"
-            onClick={() => {
-              clearAuthToken();
-              router.push("/login");
-            }}
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/notifications"
+              aria-label="Notifications"
+              className="rounded-lg border border-white/20 p-2 text-white hover:bg-white/10"
+            >
+              <Bell className="h-4 w-4" />
+            </Link>
+            <button
+              type="button"
+              className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10"
+              onClick={() => {
+                clearAuthToken();
+                router.push("/login");
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -66,16 +87,18 @@ export function DashboardShell({
           <nav className="space-y-1">
             {NAV_ITEMS.map((item) => {
               const active = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-xl px-3 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
                     active
                       ? "bg-brand-900 text-brand-amber-300"
                       : "text-slate-700 hover:bg-slate-100"
                   }`}
                 >
+                  <Icon className="h-4 w-4 shrink-0" />
                   {item.label}
                 </Link>
               );

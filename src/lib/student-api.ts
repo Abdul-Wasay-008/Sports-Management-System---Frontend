@@ -138,7 +138,7 @@ export function getRules() {
 }
 
 export function getCommittee() {
-  return apiRequest<{ committee: Array<{ name: string; role: string; contact: string }> }>(
+  return apiRequest<{ committee: Array<{ _id: string; name: string; role: string; contact: string }> }>(
     "/student/committee",
     "GET",
     undefined,
@@ -146,7 +146,7 @@ export function getCommittee() {
   );
 }
 
-export function getGameManagers(filters?: Pick<StudentFilters, "gameCategoryId">) {
+export function getGameManagers(filters?: Pick<StudentFilters, "gameCategoryId" | "gender">) {
   return apiRequest<{
     managers: Array<{
       _id: string;
@@ -158,6 +158,7 @@ export function getGameManagers(filters?: Pick<StudentFilters, "gameCategoryId">
       department?: string;
       categoryId?: string | null;
       categoryName?: string;
+      categoryGender?: "male" | "female" | "mixed" | null;
     }>;
   }>(withQuery("/student/game-managers", filters), "GET", undefined, requireToken());
 }
@@ -196,7 +197,7 @@ export function getNotifications() {
 }
 
 export function getDepartmentTeamManagers(
-  filters?: Pick<StudentFilters, "department" | "gameCategoryId">,
+  filters?: Pick<StudentFilters, "department" | "gameCategoryId" | "gender">,
 ) {
   return apiRequest<{
     teamManagers: Array<{
@@ -206,6 +207,7 @@ export function getDepartmentTeamManagers(
       contact: string | null;
       gameCategoryId: string | null;
       gameCategoryName: string;
+      gameCategoryGender: "male" | "female" | "mixed" | null;
     }>;
   }>(withQuery("/student/team-managers", filters), "GET", undefined, requireToken());
 }

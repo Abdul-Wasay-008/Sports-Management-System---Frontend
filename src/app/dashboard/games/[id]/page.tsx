@@ -45,7 +45,6 @@ export default function GameDetailsPage() {
               <p>Category: {game.genderCategory}</p>
               <p>Total Slots: {game.totalSlots}</p>
               <p>Available Slots: {game.availableSlots}</p>
-              <p className="sm:col-span-2">Rules: {game.rulesSummary}</p>
             </div>
           </div>
 
@@ -62,6 +61,15 @@ export default function GameDetailsPage() {
             ) : (
               <p className="mt-3 text-sm text-slate-600">Manager details will be published soon.</p>
             )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <h2 className="font-heading text-xl text-brand-900">Game Rules</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
+              {toRuleBullets(game.rulesSummary).map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
@@ -107,4 +115,31 @@ export default function GameDetailsPage() {
       ) : null}
     </DashboardShell>
   );
+}
+
+function toRuleBullets(rulesSummary: string) {
+  const normalized = rulesSummary.replace(/\s+/g, " ").trim();
+  if (!normalized) return ["Rules will be announced soon."];
+
+  const eventsMatch = normalized.match(/^events per department:\s*(.+)$/i);
+  if (eventsMatch) {
+    return eventsMatch[1]
+      .split(/\s*,\s*/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  if (/\d+\.\s/.test(normalized)) {
+    return normalized
+      .split(/\s*(?=\d+\.\s)/)
+      .map((item) => item.replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean);
+  }
+
+  const parts = normalized
+    .split(/\s*;\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return parts.length ? parts : [normalized];
 }
