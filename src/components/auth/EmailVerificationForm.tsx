@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { apiRequest, ApiError } from "@/lib/api";
-import { saveAuthToken } from "@/lib/auth";
+import { decodeAuthRole, saveAuthToken } from "@/lib/auth";
 
 const OTP_LENGTH = 5;
 
@@ -78,7 +78,8 @@ export function EmailVerificationForm() {
       });
       saveAuthToken(data.token);
       toast.success(data.message || "Email verified successfully.");
-      router.push("/dashboard");
+      const role = decodeAuthRole(data.token);
+      router.push(role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

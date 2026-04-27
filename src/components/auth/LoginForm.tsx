@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { apiRequest, ApiError } from "@/lib/api";
-import { saveAuthToken } from "@/lib/auth";
+import { decodeAuthRole, saveAuthToken } from "@/lib/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -17,8 +17,11 @@ export function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email.trim().toLowerCase().endsWith("@cust.pk")) {
-      toast.error("Only @cust.pk email addresses are allowed.");
+    const normalizedEmail = email.trim().toLowerCase();
+    const isCust = normalizedEmail.endsWith("@cust.pk");
+    const isAdminEmail = normalizedEmail === "wasay7757@gmail.com";
+    if (!isCust && !isAdminEmail) {
+      toast.error("Use your @cust.pk university email, or administrator credentials if provided.");
       return;
     }
 
@@ -34,7 +37,8 @@ export function LoginForm() {
 
       saveAuthToken(data.token);
       toast.success(data.message || "Login successful.");
-      router.push("/dashboard");
+      const role = decodeAuthRole(data.token);
+      router.push(role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

@@ -11,3 +11,20 @@ export function getAuthToken() {
 export function clearAuthToken() {
   localStorage.removeItem(AUTH_TOKEN_KEY);
 }
+
+/** Decode JWT payload role (client-side only; not verified). */
+export function decodeAuthRole(token: string): "student" | "admin" | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    let payload = parts[1];
+    payload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = payload.length % 4;
+    if (pad) payload += "=".repeat(4 - pad);
+    const json = JSON.parse(atob(payload)) as { role?: string };
+    if (json.role === "admin" || json.role === "student") return json.role;
+    return null;
+  } catch {
+    return null;
+  }
+}

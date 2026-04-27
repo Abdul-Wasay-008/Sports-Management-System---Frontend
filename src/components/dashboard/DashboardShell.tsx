@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
-import { clearAuthToken, getAuthToken } from "@/lib/auth";
+import { clearAuthToken, decodeAuthRole, getAuthToken } from "@/lib/auth";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -43,8 +43,13 @@ export function DashboardShell({
   const router = useRouter();
 
   useEffect(() => {
-    if (!getAuthToken()) {
+    const token = getAuthToken();
+    if (!token) {
       router.replace("/login");
+      return;
+    }
+    if (decodeAuthRole(token) === "admin") {
+      router.replace("/admin");
     }
   }, [router]);
 
