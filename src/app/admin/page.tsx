@@ -38,7 +38,8 @@ export default function AdminOverviewPage() {
           <SummaryCard label="Games organized" value={data.games.total} />
           <SummaryCard label="Accepted slots (sum on games)" value={data.games.totalAcceptedRegistrations} />
           <SummaryCard label="Total registrations" value={data.registrations.total} />
-          <SummaryCard label="Pending registrations" value={data.registrations.byStatus.pending} />
+          <SummaryCard label="Pending registrations (legacy)" value={data.registrations.byStatus.pending} />
+          <SummaryCard label="Demo booked" value={data.registrations.byStatus.demoBooked} />
           <SummaryCard label="Core committee members" value={data.committee.total} />
           <SummaryCard label="Game managers (records)" value={data.gameManagers.total} />
         </div>

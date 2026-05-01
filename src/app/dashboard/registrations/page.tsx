@@ -43,21 +43,28 @@ export default function RegistrationsPage() {
                     ? "bg-emerald-100 text-emerald-700"
                     : row.status === "rejected"
                       ? "bg-rose-100 text-rose-700"
-                      : "bg-amber-100 text-amber-700"
+                      : row.status === "demo_booked"
+                        ? "bg-sky-100 text-sky-800"
+                        : "bg-amber-100 text-amber-700"
                 }`}
               >
-                {row.status}
+                {row.status.replace("_", " ")}
               </span>
             </div>
 
             <p className="mt-2 text-sm text-slate-600">
               Applied on {new Date(row.createdAt).toLocaleString()}
             </p>
+            {row.demo ? (
+              <p className="mt-1 text-sm font-medium text-brand-900">
+                Demo: {new Date(row.demo.startsAt).toLocaleString()}
+              </p>
+            ) : null}
             {row.decisionNote ? (
               <p className="mt-1 text-sm text-slate-600">Manager note: {row.decisionNote}</p>
             ) : null}
 
-            {row.status === "pending" ? (
+            {row.status === "pending" || row.status === "demo_booked" ? (
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"

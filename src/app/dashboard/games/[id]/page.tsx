@@ -3,30 +3,51 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { DemoScheduleModal } from "@/components/dashboard/DemoScheduleModal";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ApiError } from "@/lib/api";
-import { getGameDetails, registerForGame } from "@/lib/student-api";
+import { getGameDetails, type GameDetailsPayload } from "@/lib/student-api";
 
-type GameDetailsResponse = Awaited<ReturnType<typeof getGameDetails>>;
+function registrationHint(game: GameDetailsPayload): string | null {
+  if (game.canRegisterForDemo) return null;
+  switch (game.blockReason) {
+    case "slots_full":
+      return "Registration is closed — all team slots are filled.";
+    case "no_team_manager":
+      return "Demo scheduling is not set up for your department for this game yet. Contact the sports office.";
+    case "already_registered":
+      return "You already have an active registration or demo for this game.";
+    case "cooldown":
+      return game.cooldownEndsAt
+        ? `You can apply again after ${new Date(game.cooldownEndsAt).toLocaleString()} (10-day cooldown after rejection).`
+        : "You are in the cooldown period after a rejection.";
+    default:
+      return null;
+  }
+}
 
 export default function GameDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [data, setData] = useState<GameDetailsResponse | null>(null);
+  const [game, setGame] = useState<GameDetailsPayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
 
   const gameId = params.id;
+
+  async function reloadDetails() {
+    if (!gameId) return;
+    const data = await getGameDetails(gameId);
+    setGame(data.game);
+  }
 
   useEffect(() => {
     if (!gameId) return;
     getGameDetails(gameId)
-      .then(setData)
+      .then((data) => setGame(data.game))
       .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load game details."))
       .finally(() => setLoading(false));
   }, [gameId]);
-
-  const game = data?.game;
 
   return (
     <DashboardShell title={game?.title ?? "Game Details"} subtitle="Review rules, manager info, and slots.">
@@ -49,7 +70,7 @@ export default function GameDetailsPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-            <h2 className="font-heading text-xl text-brand-900">Manager Contact</h2>
+            <h2 className="font-heading text-xl text-brand-900">Game manager (rules &amp; venue)</h2>
             {game.manager ? (
               <div className="mt-3 space-y-1 text-sm text-slate-600">
                 <p>Name: {game.manager.name}</p>
@@ -63,6 +84,20 @@ export default function GameDetailsPage() {
             )}
           </div>
 
+          {game.schedulingConfigured && game.teamManagerContact ? (
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <h2 className="font-heading text-xl text-brand-900">Your departmental team manager (demo)</h2>
+              <div className="mt-3 space-y-1 text-sm text-slate-600">
+                <p>Name: {game.teamManagerContact.name}</p>
+                {game.teamManagerContact.contact ? (
+                  <p>Contact: {game.teamManagerContact.contact}</p>
+                ) : (
+                  <p className="text-slate-500">Contact details will be shared by your department.</p>
+                )}
+              </div>
+            </div>
+          ) : null}
+
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
             <h2 className="font-heading text-xl text-brand-900">Game Rules</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
@@ -74,33 +109,48 @@ export default function GameDetailsPage() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
             <h2 className="font-heading text-xl text-brand-900">Registration</h2>
+
             {game.registrationStatus ? (
-              <p className="mt-3 text-sm text-slate-700">
-                Your current status:{" "}
-                <span className="font-semibold capitalize">{game.registrationStatus}</span>
-              </p>
+              <div className="mt-3 space-y-2 text-sm text-slate-700">
+                <p>
+                  Your current status:{" "}
+                  <span className="font-semibold capitalize">{game.registrationStatus.replace("_", " ")}</span>
+                </p>
+                {game.demo ? (
+                  <p className="text-slate-600">
+                    Scheduled demo:{" "}
+                    <span className="font-medium text-brand-900">
+                      {new Date(game.demo.startsAt).toLocaleString(undefined, {
+                        timeZone: game.scheduleTimezone,
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </span>{" "}
+                    ({game.scheduleTimezone})
+                  </p>
+                ) : null}
+              </div>
             ) : null}
+
+            <p className="mt-4 text-sm font-medium leading-relaxed text-red-600">
+              <span className="font-semibold">Demo required.</span> After you register, you will attend a demo with
+              your departmental team manager. If you are not selected, you{" "}
+              <span className="font-semibold">cannot apply again for this game for 10 days</span> from the date you
+              are rejected.
+            </p>
+
+            {registrationHint(game) ? (
+              <p className="mt-3 text-sm text-amber-800">{registrationHint(game)}</p>
+            ) : null}
+
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 type="button"
-                disabled={!game.registrationOpen || Boolean(game.registrationStatus) || submitting}
+                disabled={!game.canRegisterForDemo || !game.schedulingConfigured}
                 className="rounded-lg bg-linear-to-r from-brand-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-brand-950 shadow-sm hover:brightness-110 disabled:opacity-50"
-                onClick={async () => {
-                  setSubmitting(true);
-                  try {
-                    const result = await registerForGame(game.id);
-                    toast.success(result.message);
-                    router.refresh();
-                    const latest = await getGameDetails(game.id);
-                    setData(latest);
-                  } catch (err) {
-                    toast.error(err instanceof ApiError ? err.message : "Registration failed.");
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
+                onClick={() => setDemoModalOpen(true)}
               >
-                {submitting ? "Submitting..." : "Register for this game"}
+                Register for this demo
               </button>
               <button
                 type="button"
@@ -112,6 +162,17 @@ export default function GameDetailsPage() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {demoModalOpen && gameId ? (
+        <DemoScheduleModal
+          gameId={gameId}
+          onClose={() => setDemoModalOpen(false)}
+          onBooked={async () => {
+            await reloadDetails();
+            router.refresh();
+          }}
+        />
       ) : null}
     </DashboardShell>
   );

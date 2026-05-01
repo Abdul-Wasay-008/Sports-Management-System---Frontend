@@ -62,37 +62,62 @@ export function getGames(filters?: StudentFilters) {
   }>(withQuery("/student/games", filters), "GET", undefined, requireToken());
 }
 
+export type GameDetailsPayload = {
+  id: string;
+  title: string;
+  description: string;
+  venue: string;
+  rulesSummary: string;
+  genderCategory: "male" | "female" | "mixed";
+  totalSlots: number;
+  acceptedRegistrations: number;
+  availableSlots: number;
+  registrationOpen: boolean;
+  registrationStatus: "demo_booked" | "pending" | "accepted" | "rejected" | "cancelled" | null;
+  schedulingConfigured: boolean;
+  scheduleTimezone: string;
+  teamManagerContact: { name: string; contact: string | null } | null;
+  cooldownEndsAt: string | null;
+  canRegisterForDemo: boolean;
+  blockReason: string | null;
+  demo: { startsAt: string; endsAt: string } | null;
+  manager: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    officeAddress: string;
+    officeHours: string;
+  } | null;
+};
+
 export function getGameDetails(gameId: string) {
-  return apiRequest<{
-    game: {
-      id: string;
-      title: string;
-      description: string;
-      venue: string;
-      rulesSummary: string;
-      genderCategory: "male" | "female" | "mixed";
-      totalSlots: number;
-      acceptedRegistrations: number;
-      availableSlots: number;
-      registrationOpen: boolean;
-      registrationStatus: "pending" | "accepted" | "rejected" | "cancelled" | null;
-      manager: {
-        id: string;
-        name: string;
-        email: string;
-        phone: string;
-        officeAddress: string;
-        officeHours: string;
-      } | null;
-    };
-  }>(`/student/games/${gameId}`, "GET", undefined, requireToken());
+  return apiRequest<{ game: GameDetailsPayload }>(
+    `/student/games/${gameId}`,
+    "GET",
+    undefined,
+    requireToken(),
+  );
 }
 
-export function registerForGame(gameId: string) {
-  return apiRequest<{ message: string }>(
-    `/student/games/${gameId}/register`,
+export function getDemoSlots(gameId: string, weekStart?: string) {
+  const q = weekStart ? `?weekStart=${encodeURIComponent(weekStart)}` : "";
+  return apiRequest<{
+    weekStart: string;
+    timezone: string;
+    slots: Array<{ startsAt: string; endsAt: string; status: "free" | "booked" }>;
+  }>(`/student/games/${gameId}/demo-slots${q}`, "GET", undefined, requireToken());
+}
+
+export function registerForDemo(gameId: string, startsAt: string) {
+  return apiRequest<{
+    message: string;
+    registration: { id: string; status: string };
+    demo: { startsAt: string; endsAt: string; timezone: string };
+  }>(
+    `/student/games/${gameId}/register-demo`,
     "POST",
-    {},
+    { startsAt },
     requireToken(),
   );
 }
@@ -101,10 +126,11 @@ export function getRegistrations(filters?: StudentFilters) {
   return apiRequest<{
     registrations: Array<{
       id: string;
-      status: "pending" | "accepted" | "rejected" | "cancelled";
+      status: "demo_booked" | "pending" | "accepted" | "rejected" | "cancelled";
       decisionNote: string | null;
       decidedAt: string | null;
       createdAt: string;
+      demo: { startsAt: string; endsAt: string } | null;
       game: { id: string; title: string; venue: string } | null;
     }>;
   }>(withQuery("/student/registrations", filters), "GET", undefined, requireToken());

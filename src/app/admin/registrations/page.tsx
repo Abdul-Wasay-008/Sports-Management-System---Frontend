@@ -70,6 +70,7 @@ export default function AdminRegistrationsPage() {
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">All statuses</option>
+            <option value="demo_booked">Demo booked</option>
             <option value="pending">Pending</option>
             <option value="accepted">Accepted</option>
             <option value="rejected">Rejected</option>
@@ -96,6 +97,7 @@ export default function AdminRegistrationsPage() {
                 <th className="px-4 py-3">Dept</th>
                 <th className="px-4 py-3">Gender</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Demo</th>
                 <th className="px-4 py-3">Decided</th>
               </tr>
             </thead>
@@ -117,8 +119,20 @@ export default function AdminRegistrationsPage() {
                   <td className="px-4 py-3 capitalize text-slate-600">{r.student?.gender ?? "—"}</td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-800">
-                      {r.status}
+                      {r.status.replace("_", " ")}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-600">
+                    {r.demo ? (
+                      <>
+                        {new Date(r.demo.startsAt).toLocaleString(undefined, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500">
                     {r.decidedAt ? new Date(r.decidedAt).toLocaleString() : "—"}

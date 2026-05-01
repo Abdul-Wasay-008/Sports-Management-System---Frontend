@@ -30,7 +30,13 @@ export type AdminOverview = {
   };
   registrations: {
     total: number;
-    byStatus: { pending: number; accepted: number; rejected: number; cancelled: number };
+    byStatus: {
+      pending: number;
+      demoBooked: number;
+      accepted: number;
+      rejected: number;
+      cancelled: number;
+    };
   };
   committee: { total: number };
   gameManagers: { total: number };
@@ -192,6 +198,7 @@ export function getAdminGameRegistrations(gameId: string, status?: string) {
       decisionNote?: string;
       decidedAt?: string;
       createdAt: string;
+      demo: { startsAt: string; endsAt: string } | null;
       student: {
         id: string;
         name: string;
