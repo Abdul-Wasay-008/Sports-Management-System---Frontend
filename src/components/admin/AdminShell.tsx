@@ -42,7 +42,7 @@ export function AdminShell({
     }
     const role = decodeAuthRole(token);
     if (role !== "admin") {
-      router.replace("/dashboard");
+      router.replace(role === "team_manager" ? "/team-manager" : "/dashboard");
     }
   }, [router]);
 

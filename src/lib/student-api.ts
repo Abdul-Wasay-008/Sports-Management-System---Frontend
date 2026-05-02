@@ -136,15 +136,6 @@ export function getRegistrations(filters?: StudentFilters) {
   }>(withQuery("/student/registrations", filters), "GET", undefined, requireToken());
 }
 
-export function decideRegistration(id: string, status: "accepted" | "rejected") {
-  return apiRequest<{ message: string }>(
-    `/student/registrations/${id}/decision`,
-    "PATCH",
-    { status },
-    requireToken(),
-  );
-}
-
 export function getSchedule() {
   return apiRequest<{ schedule: Array<{ title: string; datetime: string; venue: string; note: string }> }>(
     "/student/schedule",
@@ -231,6 +222,7 @@ export function getDepartmentTeamManagers(
       department: string;
       managerName: string;
       contact: string | null;
+      email: string | null;
       gameCategoryId: string | null;
       gameCategoryName: string;
       gameCategoryGender: "male" | "female" | "mixed" | null;

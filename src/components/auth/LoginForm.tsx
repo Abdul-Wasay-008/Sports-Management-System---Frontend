@@ -38,7 +38,9 @@ export function LoginForm() {
       saveAuthToken(data.token);
       toast.success(data.message || "Login successful.");
       const role = decodeAuthRole(data.token);
-      router.push(role === "admin" ? "/admin" : "/dashboard");
+      if (role === "admin") router.push("/admin");
+      else if (role === "team_manager") router.push("/team-manager");
+      else router.push("/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
         toast.error(err.message);

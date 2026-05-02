@@ -92,6 +92,7 @@ export default function ManagersPage() {
             <h2 className="font-heading text-xl text-brand-900">{m.managerName}</h2>
             <p className="mt-2 text-sm text-slate-600">Department: {m.department}</p>
             <p className="mt-1 text-sm text-slate-600">Game: {m.gameCategoryName || "N/A"}</p>
+            {m.email ? <p className="mt-1 text-sm text-slate-600">Email: {m.email}</p> : null}
             {m.contact ? <p className="mt-1 text-sm text-slate-600">Contact: {m.contact}</p> : null}
           </div>
         ))}

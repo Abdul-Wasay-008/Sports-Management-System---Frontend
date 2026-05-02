@@ -13,7 +13,7 @@ export function clearAuthToken() {
 }
 
 /** Decode JWT payload role (client-side only; not verified). */
-export function decodeAuthRole(token: string): "student" | "admin" | null {
+export function decodeAuthRole(token: string): "student" | "admin" | "team_manager" | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
@@ -22,7 +22,9 @@ export function decodeAuthRole(token: string): "student" | "admin" | null {
     const pad = payload.length % 4;
     if (pad) payload += "=".repeat(4 - pad);
     const json = JSON.parse(atob(payload)) as { role?: string };
-    if (json.role === "admin" || json.role === "student") return json.role;
+    if (json.role === "admin" || json.role === "student" || json.role === "team_manager") {
+      return json.role;
+    }
     return null;
   } catch {
     return null;

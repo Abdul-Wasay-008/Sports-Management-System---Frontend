@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ApiError } from "@/lib/api";
-import { decideRegistration, getRegistrations } from "@/lib/student-api";
+import { getRegistrations } from "@/lib/student-api";
 
 type RegistrationsResponse = Awaited<ReturnType<typeof getRegistrations>>;
 
@@ -62,41 +62,6 @@ export default function RegistrationsPage() {
             ) : null}
             {row.decisionNote ? (
               <p className="mt-1 text-sm text-slate-600">Manager note: {row.decisionNote}</p>
-            ) : null}
-
-            {row.status === "pending" || row.status === "demo_booked" ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-                  onClick={async () => {
-                    try {
-                      const result = await decideRegistration(row.id, "accepted");
-                      toast.success(result.message);
-                      await load();
-                    } catch (err) {
-                      toast.error(err instanceof ApiError ? err.message : "Unable to update status.");
-                    }
-                  }}
-                >
-                  Simulate manager accept
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
-                  onClick={async () => {
-                    try {
-                      const result = await decideRegistration(row.id, "rejected");
-                      toast.success(result.message);
-                      await load();
-                    } catch (err) {
-                      toast.error(err instanceof ApiError ? err.message : "Unable to update status.");
-                    }
-                  }}
-                >
-                  Simulate manager reject
-                </button>
-              </div>
             ) : null}
           </div>
         ))}
