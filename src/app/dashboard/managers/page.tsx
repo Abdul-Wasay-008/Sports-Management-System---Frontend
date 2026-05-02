@@ -92,8 +92,18 @@ export default function ManagersPage() {
             <h2 className="font-heading text-xl text-brand-900">{m.managerName}</h2>
             <p className="mt-2 text-sm text-slate-600">Department: {m.department}</p>
             <p className="mt-1 text-sm text-slate-600">Game: {m.gameCategoryName || "N/A"}</p>
-            {m.email ? <p className="mt-1 text-sm text-slate-600">Email: {m.email}</p> : null}
-            {m.contact ? <p className="mt-1 text-sm text-slate-600">Contact: {m.contact}</p> : null}
+            {m.members.length ? (
+              <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                {m.members.map((member, idx) => (
+                  <li key={`${m._id}-${idx}`}>
+                    <span className="font-medium text-brand-900">{member.name}</span>
+                    {member.contact ? ` · ${member.contact}` : ""}
+                  </li>
+                ))}
+              </ul>
+            ) : m.contact ? (
+              <p className="mt-1 text-sm text-slate-600">Contact: {m.contact}</p>
+            ) : null}
           </div>
         ))}
       </div>

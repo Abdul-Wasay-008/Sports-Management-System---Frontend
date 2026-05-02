@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { TeamManagerShell } from "@/components/team-manager/TeamManagerShell";
 import { ApiError } from "@/lib/api";
@@ -20,6 +20,21 @@ export default function TeamManagerOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const a of data?.assignments ?? []) {
+      const list = map.get(a.department) ?? [];
+      list.push(a.categoryName);
+      map.set(a.department, list);
+    }
+    return Array.from(map.entries())
+      .map(([department, categories]) => ({
+        department,
+        categories: categories.slice().sort((a, b) => a.localeCompare(b)),
+      }))
+      .sort((a, b) => a.department.localeCompare(b.department));
+  }, [data]);
+
   return (
     <TeamManagerShell
       title="Overview"
@@ -37,7 +52,7 @@ export default function TeamManagerOverviewPage() {
 
       {data ? (
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Pending demo decisions
@@ -66,6 +81,51 @@ export default function TeamManagerOverviewPage() {
                 View notifications →
               </Link>
             </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Assigned cells
+              </p>
+              <p className="mt-2 font-heading text-3xl text-brand-900">
+                {data.summary.totalAssignments}
+              </p>
+              <p className="mt-3 text-sm text-slate-500">
+                {grouped.length === 1
+                  ? `${grouped.length} department`
+                  : `${grouped.length} departments`}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+            <h2 className="font-heading text-xl text-brand-900">My assignments</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              You will see student demo bookings only for the (department × game) cells listed below.
+            </p>
+
+            {grouped.length === 0 ? (
+              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-900">
+                No assignments are linked to your account yet. Please contact the sports office if
+                you believe this is an error.
+              </p>
+            ) : (
+              <div className="mt-4 space-y-4">
+                {grouped.map((dept) => (
+                  <div key={dept.department}>
+                    <p className="text-sm font-semibold text-brand-900">{dept.department}</p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {dept.categories.map((category) => (
+                        <li
+                          key={`${dept.department}-${category}`}
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
+                        >
+                          {category}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : null}

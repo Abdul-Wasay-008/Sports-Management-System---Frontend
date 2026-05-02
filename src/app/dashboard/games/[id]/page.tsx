@@ -84,17 +84,23 @@ export default function GameDetailsPage() {
             )}
           </div>
 
-          {game.schedulingConfigured && game.teamManagerContact ? (
+          {game.schedulingConfigured && game.teamManagerMembers.length > 0 ? (
             <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-              <h2 className="font-heading text-xl text-brand-900">Your departmental team manager (demo)</h2>
-              <div className="mt-3 space-y-1 text-sm text-slate-600">
-                <p>Name: {game.teamManagerContact.name}</p>
-                {game.teamManagerContact.contact ? (
-                  <p>Contact: {game.teamManagerContact.contact}</p>
-                ) : (
-                  <p className="text-slate-500">Contact details will be shared by your department.</p>
-                )}
-              </div>
+              <h2 className="font-heading text-xl text-brand-900">
+                Your departmental team manager{game.teamManagerMembers.length > 1 ? "s" : ""} (demo)
+              </h2>
+              <ul className="mt-3 space-y-3 text-sm text-slate-600">
+                {game.teamManagerMembers.map((member, idx) => (
+                  <li key={`${member.name}-${idx}`} className="space-y-1">
+                    <p className="font-medium text-slate-800">{member.name}</p>
+                    {member.contact ? (
+                      <p>Contact: {member.contact}</p>
+                    ) : (
+                      <p className="text-slate-500">Contact details will be shared by your department.</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
 

@@ -7,15 +7,32 @@ function requireToken() {
   return token;
 }
 
+export type TeamManagerAssignment = {
+  department: string;
+  categoryName: string;
+  categorySlug: string;
+  categoryGender: "male" | "female" | "mixed" | null;
+};
+
 export type TeamManagerDashboard = {
   manager: { name: string; email: string };
-  summary: { pendingDemoApprovals: number; unreadNotifications: number };
+  summary: {
+    pendingDemoApprovals: number;
+    unreadNotifications: number;
+    totalAssignments: number;
+  };
+  assignments: TeamManagerAssignment[];
   scheduleTimezone: string;
 };
+
+export type DemoQueueStatusFilter = "pending" | "accepted" | "rejected" | "all";
 
 export type DemoQueueRow = {
   demoBookingId: string;
   registrationId: string;
+  registrationStatus: "demo_booked" | "accepted" | "rejected";
+  decisionNote: string | null;
+  decidedAt: string | null;
   assignmentDepartment: string;
   startsAt: string;
   endsAt: string;
@@ -44,13 +61,13 @@ export function getTeamManagerDashboard() {
   return apiRequest<TeamManagerDashboard>("/team-manager/dashboard", "GET", undefined, requireToken());
 }
 
-export function getTeamManagerDemoQueue() {
-  return apiRequest<{ queue: DemoQueueRow[]; scheduleTimezone: string }>(
-    "/team-manager/demo-queue",
-    "GET",
-    undefined,
-    requireToken(),
-  );
+export function getTeamManagerDemoQueue(status: DemoQueueStatusFilter = "pending") {
+  const path = `/team-manager/demo-queue?status=${encodeURIComponent(status)}`;
+  return apiRequest<{
+    queue: DemoQueueRow[];
+    scheduleTimezone: string;
+    statusFilter: DemoQueueStatusFilter;
+  }>(path, "GET", undefined, requireToken());
 }
 
 export function getTeamManagerNotifications() {

@@ -77,6 +77,7 @@ export type GameDetailsPayload = {
   schedulingConfigured: boolean;
   scheduleTimezone: string;
   teamManagerContact: { name: string; contact: string | null } | null;
+  teamManagerMembers: Array<{ name: string; contact: string | null }>;
   cooldownEndsAt: string | null;
   canRegisterForDemo: boolean;
   blockReason: string | null;
@@ -222,10 +223,10 @@ export function getDepartmentTeamManagers(
       department: string;
       managerName: string;
       contact: string | null;
-      email: string | null;
       gameCategoryId: string | null;
       gameCategoryName: string;
       gameCategoryGender: "male" | "female" | "mixed" | null;
+      members: Array<{ name: string; contact: string | null }>;
     }>;
   }>(withQuery("/student/team-managers", filters), "GET", undefined, requireToken());
 }
