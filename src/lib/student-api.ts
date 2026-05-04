@@ -6,6 +6,8 @@ type StudentFilters = {
   gender?: "male" | "female" | "mixed";
   gameCategoryId?: string;
   gameId?: string;
+  from?: string;
+  to?: string;
 };
 
 function requireToken() {
@@ -21,6 +23,8 @@ function withQuery(path: string, filters?: StudentFilters) {
   if (filters.gender) params.set("gender", filters.gender);
   if (filters.gameCategoryId) params.set("gameCategoryId", filters.gameCategoryId);
   if (filters.gameId) params.set("gameId", filters.gameId);
+  if (filters.from) params.set("from", filters.from);
+  if (filters.to) params.set("to", filters.to);
   const query = params.toString();
   return query ? `${path}?${query}` : path;
 }
@@ -44,6 +48,8 @@ export function getDashboardData() {
   }>("/student/dashboard", "GET", undefined, requireToken());
 }
 
+export type GameSlotMode = "individual" | "team";
+
 export function getGames(filters?: StudentFilters) {
   return apiRequest<{
     games: Array<{
@@ -56,6 +62,10 @@ export function getGames(filters?: StudentFilters) {
       totalSlots: number;
       acceptedRegistrations: number;
       availableSlots: number;
+      slotMode: GameSlotMode;
+      perDepartmentPlayers: number;
+      availableInMyDepartment: number;
+      acceptedInMyDepartment: number;
       registrationOpen: boolean;
       manager: { id: string; name: string } | null;
     }>;
@@ -72,6 +82,11 @@ export type GameDetailsPayload = {
   totalSlots: number;
   acceptedRegistrations: number;
   availableSlots: number;
+  slotMode: GameSlotMode;
+  perDepartmentPlayers: number;
+  availableInMyDepartment: number;
+  acceptedInMyDepartment: number;
+  events: Array<{ name: string; perDepartmentPlayers: number }> | null;
   registrationOpen: boolean;
   registrationStatus: "demo_booked" | "pending" | "accepted" | "rejected" | "cancelled" | null;
   schedulingConfigured: boolean;
@@ -240,4 +255,91 @@ export function getGameCategories() {
       gender: "male" | "female" | "mixed";
     }>;
   }>("/student/game-categories", "GET", undefined, requireToken());
+}
+
+export type MyStatsResponse = {
+  summary: {
+    totalApplied: number;
+    accepted: number;
+    rejected: number;
+    pending: number;
+    cancelled: number;
+    acceptRate: number | null;
+  };
+  funnel: Array<{ stage: string; value: number }>;
+  statusBreakdown: {
+    pending: number;
+    demoBooked: number;
+    accepted: number;
+    rejected: number;
+    cancelled: number;
+  };
+  sportsRadar: Array<{ sport: string; tried: number; available: number }>;
+  timeline: Array<{ date: string; applications: number; decisions: number }>;
+  cooldowns: Array<{
+    gameId: string;
+    gameTitle: string;
+    rejectedAt: string;
+    cooldownEndsAt: string;
+    daysRemaining: number;
+  }>;
+};
+
+export function getMyStats() {
+  return apiRequest<MyStatsResponse>("/student/me/stats", "GET", undefined, requireToken());
+}
+
+export type DepartmentTrendsResponse = {
+  department: string;
+  eligibleGenders: Array<"male" | "female" | "mixed">;
+  slotUtilization: Array<{
+    gameId: string;
+    title: string;
+    genderCategory: "male" | "female" | "mixed";
+    totalSlots: number;
+    accepted: number;
+    available: number;
+    utilizationPct: number;
+  }>;
+  genderInDepartment: { male: number; female: number };
+  demoToAccept: Array<{
+    gameId: string;
+    title: string;
+    demoStarted: number;
+    decisions: number;
+    accepted: number;
+    rejected: number;
+    acceptRate: number;
+  }>;
+};
+
+export function getDepartmentTrends() {
+  return apiRequest<DepartmentTrendsResponse>(
+    "/student/department-trends",
+    "GET",
+    undefined,
+    requireToken(),
+  );
+}
+
+export type ResultsStandingsResponse = {
+  totalEvents: number;
+  medalTable: Array<{
+    department: string;
+    gold: number;
+    silver: number;
+    total: number;
+  }>;
+  bySport: Array<{ name: string; gold: number; silver: number }>;
+  byGender: { male: number; female: number; mixed: number };
+  timeline: Array<{ date: string; titles: number }>;
+};
+
+export function getResultsStandings(filters?: Pick<StudentFilters, "gameCategoryId" | "gender" | "from" | "to">) {
+  return apiRequest<ResultsStandingsResponse>(
+    withQuery("/student/results/standings", filters),
+    "GET",
+    undefined,
+    requireToken(),
+  );
 }

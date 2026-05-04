@@ -44,14 +44,24 @@ export default function GamesPage() {
                     : "bg-rose-100 text-rose-700"
                 }`}
               >
-                {game.registrationOpen ? "Registration Open" : "Slots Full"}
+                {game.registrationOpen
+                  ? "Registration Open"
+                  : game.availableInMyDepartment <= 0
+                    ? "Department Full"
+                    : "Slots Full"}
               </span>
             </div>
 
             <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
               <p>Venue: {game.venue}</p>
               <p>Category: {game.genderCategory}</p>
-              <p>Available Slots: {game.availableSlots}</p>
+              <p>
+                Your department:{" "}
+                <span className="font-medium text-brand-900">
+                  {game.availableInMyDepartment} / {game.perDepartmentPlayers}
+                </span>{" "}
+                ({game.slotMode === "team" ? "1 team" : "individual"})
+              </p>
               <p>Manager: {game.manager?.name ?? "Not assigned"}</p>
             </div>
 

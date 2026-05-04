@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: "/admin/students", label: "Students", icon: UsersRound },
   { href: "/admin/games", label: "Games", icon: Medal },
   { href: "/admin/registrations", label: "Registrations", icon: ClipboardList },
+  { href: "/admin/results", label: "Results", icon: Trophy },
   { href: "/admin/stats", label: "Statistics", icon: BarChart3 },
 ] satisfies Array<{ href: string; label: string; icon: LucideIcon }>;
 

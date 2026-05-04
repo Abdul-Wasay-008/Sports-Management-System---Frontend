@@ -1,49 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { ApiError } from "@/lib/api";
-import { getDashboardData, getResults } from "@/lib/student-api";
+import dynamic from "next/dynamic";
 
-type ResultsResponse = Awaited<ReturnType<typeof getResults>>;
+const ResultsPageClient = dynamic(() => import("./ResultsPageClient"), {
+  ssr: false,
+  loading: () => (
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-slate-600 shadow-sm">
+      Loading charts…
+    </div>
+  ),
+});
 
 export default function ResultsPage() {
-  const [data, setData] = useState<ResultsResponse | null>(null);
-
-  useEffect(() => {
-    getDashboardData()
-      .then((dashboard) =>
-        getResults({ department: dashboard.student.department, gender: dashboard.student.gender }),
-      )
-      .then(setData)
-      .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load results."));
-  }, []);
-
-  return (
-    <DashboardShell title="Results" subtitle="Recent outcomes and department standings highlights.">
-      <div className="space-y-4">
-        {data?.results.map((result) => (
-          <div
-            key={result._id}
-            className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm"
-          >
-            <h2 className="font-heading text-xl text-brand-900">{result.gameTitle}</h2>
-            {result.genderCategory ? (
-              <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">
-                Category: {result.genderCategory}
-              </p>
-            ) : null}
-            <p className="mt-2 text-sm text-slate-600">Winner: {result.winnerDepartment}</p>
-            {result.runnerUpDepartment ? (
-              <p className="mt-1 text-sm text-slate-600">Runner-up: {result.runnerUpDepartment}</p>
-            ) : null}
-            <p className="mt-1 text-sm text-slate-500">
-              Played on {new Date(result.playedAt).toLocaleDateString()}
-            </p>
-          </div>
-        ))}
-      </div>
-    </DashboardShell>
-  );
+  return <ResultsPageClient />;
 }

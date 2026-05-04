@@ -11,8 +11,12 @@ import { getGameDetails, type GameDetailsPayload } from "@/lib/student-api";
 function registrationHint(game: GameDetailsPayload): string | null {
   if (game.canRegisterForDemo) return null;
   switch (game.blockReason) {
+    case "department_slots_full": {
+      const slotWord = game.slotMode === "team" ? "roster slot" : "slot";
+      return `Your department has filled all ${game.perDepartmentPlayers} ${slotWord}${game.perDepartmentPlayers === 1 ? "" : "s"} for this game.`;
+    }
     case "slots_full":
-      return "Registration is closed — all team slots are filled.";
+      return "Registration is closed — all university-wide slots are filled.";
     case "no_team_manager":
       return "Demo scheduling is not set up for your department for this game yet. Contact the sports office.";
     case "already_registered":
@@ -64,9 +68,35 @@ export default function GameDetailsPage() {
             <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
               <p>Venue: {game.venue}</p>
               <p>Category: {game.genderCategory}</p>
-              <p>Total Slots: {game.totalSlots}</p>
-              <p>Available Slots: {game.availableSlots}</p>
+              <p>
+                Slots in your department:{" "}
+                <span className="font-medium text-brand-900">
+                  {game.availableInMyDepartment} / {game.perDepartmentPlayers}
+                </span>
+              </p>
+              <p>
+                Mode:{" "}
+                {game.slotMode === "team"
+                  ? `Team (1 team per dept, max ${game.perDepartmentPlayers})`
+                  : `Individual (${game.perDepartmentPlayers} player${game.perDepartmentPlayers === 1 ? "" : "s"} per dept)`}
+              </p>
+              <p className="text-xs text-slate-500 sm:col-span-2">
+                University-wide capacity: {game.availableSlots} / {game.totalSlots} ({game.acceptedRegistrations} accepted across all departments)
+              </p>
             </div>
+            {game.events && game.events.length > 0 ? (
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-brand-900">Events &amp; per-department slots</p>
+                <ul className="mt-2 grid list-disc gap-1 pl-5 text-sm text-slate-700 sm:grid-cols-2">
+                  {game.events.map((event) => (
+                    <li key={event.name}>
+                      {event.name}: {event.perDepartmentPlayers}{" "}
+                      {event.perDepartmentPlayers === 1 ? "player" : "players"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">

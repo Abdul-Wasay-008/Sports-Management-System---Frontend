@@ -120,6 +120,16 @@ export function deleteAdminStudent(id: string) {
   return apiRequest<{ deleted: boolean }>(`/admin/students/${id}`, "DELETE", undefined, requireToken());
 }
 
+export type AdminSlotMode = "individual" | "team";
+
+export type AdminSlotEvent = { name: string; perDepartmentPlayers: number };
+
+export type AdminGameSlotPolicy = {
+  mode: AdminSlotMode;
+  perDepartmentPlayers: number;
+  events: AdminSlotEvent[] | null;
+};
+
 export function listAdminGames(params?: { search?: string; gender?: string; sportId?: string }) {
   return apiRequest<{
     games: Array<{
@@ -132,6 +142,9 @@ export function listAdminGames(params?: { search?: string; gender?: string; spor
       rulesSummary: string;
       totalSlots: number;
       acceptedRegistrations: number;
+      slotMode: AdminSlotMode | null;
+      perDepartmentPlayers: number | null;
+      slotPolicy: AdminGameSlotPolicy | null;
       isActive: boolean;
       managerId?: string;
       manager?: unknown;
@@ -159,7 +172,9 @@ export function createAdminGame(body: {
   genderCategory: "male" | "female" | "mixed";
   venue: string;
   rulesSummary: string;
-  totalSlots: number;
+  slotMode: AdminSlotMode;
+  perDepartmentPlayers: number;
+  events?: AdminSlotEvent[];
   managerId: string;
   gameCategoryId: string;
   isActive?: boolean;
@@ -176,7 +191,9 @@ export function updateAdminGame(
     genderCategory: "male" | "female" | "mixed";
     venue: string;
     rulesSummary: string;
-    totalSlots: number;
+    slotMode: AdminSlotMode;
+    perDepartmentPlayers: number;
+    events: AdminSlotEvent[];
     managerId: string;
     gameCategoryId: string;
     isActive: boolean;
@@ -245,4 +262,77 @@ export function getAdminLookups() {
     }>;
     managers: Array<{ id: string; name: string; email: string; phone: string }>;
   }>("/admin/lookups", "GET", undefined, requireToken());
+}
+
+export type AdminResultRow = {
+  _id: string;
+  gameId?: string;
+  gameTitle: string;
+  gameCategoryId?: string;
+  genderCategory?: "male" | "female" | "mixed";
+  winnerDepartment: string;
+  runnerUpDepartment?: string;
+  playedAt: string;
+  createdAt?: string;
+};
+
+export function listAdminResults(params?: {
+  gameId?: string;
+  gameCategoryId?: string;
+  gender?: string;
+  department?: string;
+  from?: string;
+  to?: string;
+  limit?: number;
+}) {
+  return apiRequest<{ results: AdminResultRow[] }>(
+    withParams("/admin/results", {
+      gameId: params?.gameId,
+      gameCategoryId: params?.gameCategoryId,
+      gender: params?.gender,
+      department: params?.department,
+      from: params?.from,
+      to: params?.to,
+      limit: params?.limit?.toString(),
+    }),
+    "GET",
+    undefined,
+    requireToken(),
+  );
+}
+
+export function createAdminResult(body: {
+  gameId?: string;
+  gameTitle?: string;
+  gameCategoryId?: string;
+  genderCategory?: "male" | "female" | "mixed";
+  winnerDepartment: string;
+  runnerUpDepartment?: string;
+  playedAt?: string;
+}) {
+  return apiRequest<{ id: string }>("/admin/results", "POST", body, requireToken());
+}
+
+export function updateAdminResult(
+  id: string,
+  body: Partial<{
+    gameId: string;
+    gameTitle: string;
+    gameCategoryId: string;
+    genderCategory: "male" | "female" | "mixed";
+    winnerDepartment: string;
+    runnerUpDepartment: string;
+    playedAt: string;
+  }>,
+) {
+  return apiRequest<{ id: string }>(`/admin/results/${id}`, "PATCH", body, requireToken());
+}
+
+export function deleteAdminResult(id: string) {
+  return apiRequest<{ deleted: boolean }>(
+    `/admin/results/${id}`,
+    "DELETE",
+    undefined,
+    requireToken(),
+  );
 }

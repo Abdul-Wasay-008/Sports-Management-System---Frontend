@@ -68,6 +68,7 @@ export default function AdminGamesPage() {
 
   async function submitGame(form: FormData) {
     const gc = form.get("genderCategory");
+    const sm = form.get("slotMode");
     const body = {
       title: String(form.get("title") ?? ""),
       slug: String(form.get("slug") ?? "").trim().toLowerCase(),
@@ -78,7 +79,8 @@ export default function AdminGamesPage() {
         | "mixed",
       venue: String(form.get("venue") ?? ""),
       rulesSummary: String(form.get("rulesSummary") ?? ""),
-      totalSlots: Number(form.get("totalSlots") ?? 0),
+      slotMode: (sm === "team" ? "team" : "individual") as "individual" | "team",
+      perDepartmentPlayers: Number(form.get("perDepartmentPlayers") ?? 0),
       managerId: String(form.get("managerId") ?? ""),
       gameCategoryId: String(form.get("gameCategoryId") ?? ""),
       isActive: form.get("isActive") === "on",
@@ -188,7 +190,8 @@ export default function AdminGamesPage() {
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Slug</th>
                 <th className="px-4 py-3">Gender</th>
-                <th className="px-4 py-3">Slots</th>
+                <th className="px-4 py-3">Slot policy</th>
+                <th className="px-4 py-3">Total</th>
                 <th className="px-4 py-3">Accepted</th>
                 <th className="px-4 py-3">Active</th>
                 <th className="px-4 py-3">Actions</th>
@@ -200,6 +203,11 @@ export default function AdminGamesPage() {
                   <td className="px-4 py-3 font-medium text-brand-900">{g.title}</td>
                   <td className="px-4 py-3 text-slate-600">{g.slug}</td>
                   <td className="px-4 py-3 capitalize text-slate-600">{g.genderCategory}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {g.slotMode && g.perDepartmentPlayers != null
+                      ? `${g.slotMode === "team" ? "Team" : "Individual"} • ${g.perDepartmentPlayers}/dept`
+                      : "—"}
+                  </td>
                   <td className="px-4 py-3 text-slate-600">{g.totalSlots}</td>
                   <td className="px-4 py-3 text-slate-600">{g.acceptedRegistrations}</td>
                   <td className="px-4 py-3">{g.isActive ? "Yes" : "No"}</td>
@@ -308,17 +316,34 @@ export default function AdminGamesPage() {
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-700">
-                Total slots
-                <input
-                  name="totalSlots"
-                  type="number"
-                  min={1}
-                  required
-                  defaultValue={modal.game?.totalSlots ?? 24}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                />
-              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block text-xs font-medium text-slate-700">
+                  Slot mode
+                  <select
+                    name="slotMode"
+                    required
+                    defaultValue={modal.game?.slotMode ?? "individual"}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  >
+                    <option value="individual">Individual (N players per dept)</option>
+                    <option value="team">Team (1 team per dept, roster max)</option>
+                  </select>
+                </label>
+                <label className="block text-xs font-medium text-slate-700">
+                  Per-department players
+                  <input
+                    name="perDepartmentPlayers"
+                    type="number"
+                    min={1}
+                    required
+                    defaultValue={modal.game?.perDepartmentPlayers ?? 2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-slate-500">
+                Total university-wide slots are derived as <span className="font-medium">per-department × 15 departments</span>. Per-event caps for Athletics are managed in the seed JSON.
+              </p>
               <label className="block text-xs font-medium text-slate-700">
                 Game category
                 <select
