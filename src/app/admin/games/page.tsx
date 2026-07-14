@@ -82,7 +82,6 @@ export default function AdminGamesPage() {
       slotMode: (sm === "team" ? "team" : "individual") as "individual" | "team",
       perDepartmentPlayers: Number(form.get("perDepartmentPlayers") ?? 0),
       managerId: String(form.get("managerId") ?? ""),
-      gameCategoryId: String(form.get("gameCategoryId") ?? ""),
       isActive: form.get("isActive") === "on",
     };
 
@@ -344,22 +343,6 @@ export default function AdminGamesPage() {
               <p className="text-xs text-slate-500">
                 Total university-wide slots are derived as <span className="font-medium">per-department × 15 departments</span>. Per-event caps for Athletics are managed in the seed JSON.
               </p>
-              <label className="block text-xs font-medium text-slate-700">
-                Game category
-                <select
-                  name="gameCategoryId"
-                  required
-                  defaultValue={modal.game?.gameCategoryId}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                >
-                  <option value="">Select…</option>
-                  {lookups.categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.gender})
-                    </option>
-                  ))}
-                </select>
-              </label>
               <label className="block text-xs font-medium text-slate-700">
                 Game manager
                 <select

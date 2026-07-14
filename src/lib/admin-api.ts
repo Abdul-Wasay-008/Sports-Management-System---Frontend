@@ -176,7 +176,7 @@ export function createAdminGame(body: {
   perDepartmentPlayers: number;
   events?: AdminSlotEvent[];
   managerId: string;
-  gameCategoryId: string;
+  gameCategoryId?: string;
   isActive?: boolean;
 }) {
   return apiRequest<{ id: string }>("/admin/games", "POST", body, requireToken());

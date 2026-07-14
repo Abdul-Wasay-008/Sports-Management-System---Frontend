@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { ApiError } from "@/lib/api";
@@ -14,11 +14,28 @@ import {
   type AdminStudentRow,
 } from "@/lib/admin-api";
 
+const STUDENT_FETCH_LIMIT = 500;
+
+function groupStudentsByDepartment(students: AdminStudentRow[]) {
+  const map = new Map<string, AdminStudentRow[]>();
+  for (const student of students) {
+    const department = student.department?.trim() || "Unassigned";
+    const list = map.get(department) ?? [];
+    list.push(student);
+    map.set(department, list);
+  }
+
+  return Array.from(map.entries())
+    .map(([department, deptStudents]) => ({
+      department,
+      students: deptStudents.slice().sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.department.localeCompare(b.department));
+}
+
 export default function AdminStudentsPage() {
   const [rows, setRows] = useState<AdminStudentRow[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
   const [search, setSearch] = useState("");
   const [searchDraft, setSearchDraft] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -38,8 +55,8 @@ export default function AdminStudentsPage() {
       const res = await listAdminStudents({
         search: search || undefined,
         status: statusFilter || undefined,
-        page,
-        limit,
+        page: 1,
+        limit: STUDENT_FETCH_LIMIT,
       });
       setRows(res.students);
       setTotal(res.total);
@@ -48,7 +65,10 @@ export default function AdminStudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter, page, limit]);
+  }, [search, statusFilter]);
+
+  const groupedStudents = useMemo(() => groupStudentsByDepartment(rows), [rows]);
+  const truncated = total > rows.length;
 
   useEffect(() => {
     load();
@@ -143,8 +163,6 @@ export default function AdminStudentsPage() {
     }
   }
 
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-
   return (
     <AdminShell
       title="Students"
@@ -164,10 +182,7 @@ export default function AdminStudentsPage() {
           <button
             type="button"
             className="rounded-lg bg-brand-900 px-3 py-2 text-sm font-medium text-brand-amber-300"
-            onClick={() => {
-              setPage(1);
-              setSearch(searchDraft.trim());
-            }}
+            onClick={() => setSearch(searchDraft.trim())}
           >
             Apply
           </button>
@@ -175,10 +190,7 @@ export default function AdminStudentsPage() {
             <label className="mb-1 block text-xs font-medium text-slate-600">Status</label>
             <select
               value={statusFilter}
-              onChange={(e) => {
-                setPage(1);
-                setStatusFilter(e.target.value);
-              }}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
             >
               <option value="">All</option>
@@ -197,115 +209,73 @@ export default function AdminStudentsPage() {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        {loading ? (
-          <p className="p-6 text-slate-600">Loading…</p>
-        ) : rows.length === 0 ? (
-          <p className="p-6 text-slate-600">No students match your filters.</p>
-        ) : (
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Reg #</th>
-                <th className="px-4 py-3">Dept</th>
-                <th className="px-4 py-3">Gender</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Regs</th>
-                <th className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100">
-                  <td className="px-4 py-3 font-medium text-brand-900">{s.name}</td>
-                  <td className="px-4 py-3 text-slate-700">{s.email}</td>
-                  <td className="px-4 py-3 text-slate-600">{s.registrationNumber}</td>
-                  <td className="px-4 py-3 text-slate-600">{s.department}</td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{s.gender}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        s.status === "active"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : s.status === "suspended"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {s.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{s.registrationCount}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="text-xs font-medium text-brand-amber-700 hover:underline"
-                        onClick={() => setEditRow(s)}
-                      >
-                        Edit
-                      </button>
-                      {s.status === "active" ? (
-                        <button
-                          type="button"
-                          className="text-xs font-medium text-red-600 hover:underline"
-                          onClick={() => setStatusRow(s)}
-                        >
-                          Block
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="text-xs font-medium text-emerald-700 hover:underline"
-                          onClick={() => setStatusRow(s)}
-                        >
-                          Unblock
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="text-xs font-medium text-red-800 hover:underline"
-                        onClick={() => {
+      {truncated ? (
+        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-sm text-amber-900">
+          Showing {rows.length} of {total} students. Use search or status filters to narrow the list.
+        </p>
+      ) : null}
+
+      {loading ? (
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">Loading…</p>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">No students match your filters.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {groupedStudents.map(({ department, students }) => (
+            <section
+              key={department}
+              className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+            >
+              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 sm:px-5">
+                <h2 className="font-heading text-lg text-brand-900">{department}</h2>
+                <p className="text-xs text-slate-500">
+                  {students.length === 1 ? "1 student" : `${students.length} students`}
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="border-b border-slate-200 bg-white text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Reg #</th>
+                      <th className="px-4 py-3">Gender</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Regs</th>
+                      <th className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map((s) => (
+                      <StudentTableRow
+                        key={s.id}
+                        student={s}
+                        onEdit={() => setEditRow(s)}
+                        onToggleStatus={() => setStatusRow(s)}
+                        onDelete={() => {
                           setDeleteRow(s);
                           setDeleteConfirm("");
                         }}
-                      >
-                        Hard delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
-        <p>
-          Page {page} of {totalPages} ({total} total)
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={page <= 1}
-            className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            disabled={page >= totalPages}
-            className="rounded-lg border border-slate-200 px-3 py-1 disabled:opacity-40"
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))}
         </div>
-      </div>
+      )}
+
+      {!loading && rows.length > 0 ? (
+        <p className="mt-4 text-sm text-slate-600">
+          {total} student{total === 1 ? "" : "s"} across {groupedStudents.length} department
+          {groupedStudents.length === 1 ? "" : "s"}
+        </p>
+      ) : null}
 
       {createOpen ? (
         <Modal title="Add student" onClose={() => !busy && setCreateOpen(false)}>
@@ -473,6 +443,76 @@ export default function AdminStudentsPage() {
         </Modal>
       ) : null}
     </AdminShell>
+  );
+}
+
+function StudentTableRow({
+  student: s,
+  onEdit,
+  onToggleStatus,
+  onDelete,
+}: {
+  student: AdminStudentRow;
+  onEdit: () => void;
+  onToggleStatus: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <tr className="border-b border-slate-100">
+      <td className="px-4 py-3 font-medium text-brand-900">{s.name}</td>
+      <td className="px-4 py-3 text-slate-700">{s.email}</td>
+      <td className="px-4 py-3 text-slate-600">{s.registrationNumber}</td>
+      <td className="px-4 py-3 capitalize text-slate-600">{s.gender}</td>
+      <td className="px-4 py-3">
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            s.status === "active"
+              ? "bg-emerald-100 text-emerald-800"
+              : s.status === "suspended"
+                ? "bg-red-100 text-red-800"
+                : "bg-slate-100 text-slate-700"
+          }`}
+        >
+          {s.status}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-slate-600">{s.registrationCount}</td>
+      <td className="px-4 py-3">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="text-xs font-medium text-brand-amber-700 hover:underline"
+            onClick={onEdit}
+          >
+            Edit
+          </button>
+          {s.status === "active" ? (
+            <button
+              type="button"
+              className="text-xs font-medium text-red-600 hover:underline"
+              onClick={onToggleStatus}
+            >
+              Block
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="text-xs font-medium text-emerald-700 hover:underline"
+              onClick={onToggleStatus}
+            >
+              Unblock
+            </button>
+          )}
+          <button
+            type="button"
+            className="text-xs font-medium text-red-800 hover:underline"
+            onClick={onDelete}
+          >
+            Hard delete
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }
 
