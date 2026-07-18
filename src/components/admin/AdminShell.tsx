@@ -7,6 +7,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   Medal,
+  Settings,
   Trophy,
   UsersRound,
   type LucideIcon,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/admin/registrations", label: "Registrations", icon: ClipboardList },
   { href: "/admin/results", label: "Results", icon: Trophy },
   { href: "/admin/stats", label: "Statistics", icon: BarChart3 },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ] satisfies Array<{ href: string; label: string; icon: LucideIcon }>;
 
 export function AdminShell({

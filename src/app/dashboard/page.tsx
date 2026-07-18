@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { ApiError } from "@/lib/api";
+import { ApiError, getPublicSportsWeekStatus, type SportsWeekStatus } from "@/lib/api";
 import { getDashboardData } from "@/lib/student-api";
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>;
@@ -11,10 +12,17 @@ type DashboardData = Awaited<ReturnType<typeof getDashboardData>>;
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sportsWeek, setSportsWeek] = useState<SportsWeekStatus | null>(null);
 
   useEffect(() => {
-    getDashboardData()
-      .then(setData)
+    Promise.all([
+      getDashboardData(),
+      getPublicSportsWeekStatus().catch(() => null),
+    ])
+      .then(([dashboard, sw]) => {
+        setData(dashboard);
+        setSportsWeek(sw);
+      })
       .catch((err) => {
         toast.error(err instanceof ApiError ? err.message : "Failed to load dashboard.");
       })
@@ -29,6 +37,47 @@ export default function DashboardPage() {
       {loading ? (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-slate-600 shadow-sm">
           Loading dashboard...
+        </div>
+      ) : null}
+
+      {/* Sports Week inactive banner */}
+      {!loading && sportsWeek && !sportsWeek.isActive ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 text-2xl" aria-hidden>
+              🏟️
+            </span>
+            <div>
+              <p className="font-semibold text-amber-900">
+                {sportsWeek.seasonLabel
+                  ? `${sportsWeek.seasonLabel} — Registrations Closed`
+                  : "Sports Week Registrations Are Closed"}
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                {sportsWeek.announcementMessage ||
+                  "Sports Week registrations are currently closed. Check back soon!"}
+              </p>
+              {sportsWeek.nextSeasonHint ? (
+                <p className="mt-1 text-sm font-medium text-amber-700">
+                  {sportsWeek.nextSeasonHint}
+                </p>
+              ) : null}
+              <div className="mt-3 flex gap-3">
+                <Link
+                  href="/dashboard/results"
+                  className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-200"
+                >
+                  View Past Results
+                </Link>
+                <Link
+                  href="/dashboard/stats"
+                  className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-200"
+                >
+                  View Statistics
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       ) : null}
 

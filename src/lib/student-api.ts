@@ -69,6 +69,7 @@ export function getGames(filters?: StudentFilters) {
       registrationOpen: boolean;
       manager: { id: string; name: string } | null;
     }>;
+    sportsWeekInactive?: boolean;
   }>(withQuery("/student/games", filters), "GET", undefined, requireToken());
 }
 

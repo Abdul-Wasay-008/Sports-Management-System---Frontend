@@ -336,3 +336,32 @@ export function deleteAdminResult(id: string) {
     requireToken(),
   );
 }
+
+// ── Sports Week Settings ───────────���────────────────────────────────────────
+
+export type SportsWeekSettings = {
+  isActive: boolean;
+  seasonLabel: string;
+  startDate: string | null;
+  endDate: string | null;
+  announcementMessage: string;
+  nextSeasonHint: string;
+};
+
+export function getAdminSportsWeekSettings() {
+  return apiRequest<SportsWeekSettings>(
+    "/admin/sports-week-settings",
+    "GET",
+    undefined,
+    requireToken(),
+  );
+}
+
+export function updateAdminSportsWeekSettings(body: Partial<SportsWeekSettings>) {
+  return apiRequest<SportsWeekSettings>(
+    "/admin/sports-week-settings",
+    "PATCH",
+    body,
+    requireToken(),
+  );
+}

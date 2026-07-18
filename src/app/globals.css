@@ -50,3 +50,20 @@ input[type="reset"]:disabled,
 [aria-disabled="true"] {
   cursor: not-allowed;
 }
+
+.input-base {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-base:focus {
+  border-color: #1e2a42;
+  box-shadow: 0 0 0 3px rgba(30, 42, 66, 0.1);
+}

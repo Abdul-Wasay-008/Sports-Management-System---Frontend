@@ -35,6 +35,7 @@ export default function GameDetailsPage() {
   const router = useRouter();
   const [game, setGame] = useState<GameDetailsPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [closed, setClosed] = useState(false);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
 
   const gameId = params.id;
@@ -49,7 +50,13 @@ export default function GameDetailsPage() {
     if (!gameId) return;
     getGameDetails(gameId)
       .then((data) => setGame(data.game))
-      .catch((err) => toast.error(err instanceof ApiError ? err.message : "Failed to load game details."))
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 403) {
+          setClosed(true);
+        } else {
+          toast.error(err instanceof ApiError ? err.message : "Failed to load game details.");
+        }
+      })
       .finally(() => setLoading(false));
   }, [gameId]);
 
@@ -58,6 +65,33 @@ export default function GameDetailsPage() {
       {loading ? (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 text-slate-600 shadow-sm">
           Loading game details...
+        </div>
+      ) : null}
+
+      {/* Sports week closed — game detail not accessible */}
+      {!loading && closed ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
+          <p className="text-4xl" aria-hidden>🏟️</p>
+          <h2 className="mt-3 font-heading text-2xl text-amber-900">Sports Week is Currently Closed</h2>
+          <p className="mt-2 text-sm text-amber-800">
+            Game registration is not available at this time. You can still browse past results and standings.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              className="rounded-xl bg-amber-100 px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-200"
+              onClick={() => router.push("/dashboard/games")}
+            >
+              Back to Games
+            </button>
+            <button
+              type="button"
+              className="rounded-xl bg-amber-100 px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-200"
+              onClick={() => router.push("/dashboard/results")}
+            >
+              View Past Results
+            </button>
+          </div>
         </div>
       ) : null}
 

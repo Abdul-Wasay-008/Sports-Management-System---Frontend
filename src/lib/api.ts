@@ -1,5 +1,18 @@
 export const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
+export type SportsWeekStatus = {
+  isActive: boolean;
+  seasonLabel: string;
+  startDate: string | null;
+  endDate: string | null;
+  announcementMessage: string;
+  nextSeasonHint: string;
+};
+
+export async function getPublicSportsWeekStatus(): Promise<SportsWeekStatus> {
+  return apiRequest<SportsWeekStatus>("/sports-week/status", "GET");
+}
+
 type ApiMethod = "GET" | "POST" | "PATCH" | "DELETE";
 
 export class ApiError extends Error {
